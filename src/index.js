@@ -100,7 +100,7 @@ export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
     if (pathname !== '/v1/') {
-      return new Response('Not found', { status: 404, headers: CORS_HEADERS });
+      return new Response('Not found v1', { status: 404, headers: CORS_HEADERS });
     }
 
     if (request.method === 'OPTIONS') {
