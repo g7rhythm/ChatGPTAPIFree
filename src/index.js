@@ -52,9 +52,10 @@ const handleRequest = async (request, env) => {
 
   try {
     // Enforce the rate limit based on hashed client IP address
+    const  appkeys  = (await env.kv.get('appkeys', { type: 'json' })) || {};
     const utcNow = moment.utc();
     const clientIp = request.headers.get('CF-Connecting-IP');
-    const clientIpHash = await hashIp(clientIp, utcNow, env.SECRET_KEY);
+    const clientIpHash = await hashIp(clientIp, utcNow, appkeys.SECRET_KEY);
     const rateLimitKey = `rate_limit_${clientIpHash}`;
     const rateLimitExpiration = utcNow.startOf('hour').add(1, 'hour').unix();
     const { rateLimitCount = 0 } = (await env.kv.get(rateLimitKey, { type: 'json' })) || {};
@@ -63,7 +64,7 @@ const handleRequest = async (request, env) => {
     }
 
     // Forward a POST request to the upstream URL and return the response
-    const api_key = randomChoice(JSON.parse(env.API_KEYS));
+    const api_key = randomChoice(JSON.parse(appkeys.API_KEYS));
     const upstreamResponse = await fetch(UPSTREAM_URL, {
       method: 'POST',
       headers: {
