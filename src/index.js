@@ -83,7 +83,7 @@ const handleRequest = async (request, env) => {
     }
 
     // Update the rate limit information
-    const rateLimitExpiration =  moment.utc().startOf('hour').add(1, 'hour').unix();
+    const rateLimitExpiration =  moment.utc().startOf('hour').add(1, 'hour').add(2, 'minutes').unix();
     await env.kv.put(rateLimitKey, JSON.stringify({ rateLimitCount: rateLimitCount + 1 }), { expiration: rateLimitExpiration });
 
     return new Response(upstreamResponse.body, {
