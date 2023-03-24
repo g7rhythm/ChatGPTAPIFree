@@ -57,7 +57,7 @@ const handleRequest = async (request, env) => {
     const clientIp = request.headers.get('CF-Connecting-IP');
     const clientIpHash = await hashIp(clientIp, utcNow, appkeys.SECRET_KEY);
     const rateLimitKey = `rate_limit_${clientIpHash}`;
-    const rateLimitExpiration = utcNow.startOf('hour').add(1, 'hour').unix();
+    
     const { rateLimitCount = 0 } = (await env.kv.get(rateLimitKey, { type: 'json' })) || {};
     if (rateLimitCount > MAX_REQUESTS) {
       return new Response('Too many requests', { status: 429, headers: CORS_HEADERS });
@@ -83,6 +83,7 @@ const handleRequest = async (request, env) => {
     }
 
     // Update the rate limit information
+    const rateLimitExpiration =  moment.utc().startOf('hour').add(1, 'hour').unix();
     await env.kv.put(rateLimitKey, JSON.stringify({ rateLimitCount: rateLimitCount + 1 }), { expiration: rateLimitExpiration });
 
     return new Response(upstreamResponse.body, {
