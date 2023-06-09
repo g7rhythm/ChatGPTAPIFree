@@ -101,7 +101,7 @@ const handleRequest = async (request, env) => {
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
-    if (pathname !== '/v1/') {
+    if (pathname !== '/v1/chat/completions') {
       return new Response('Not found v1', { status: 404, headers: CORS_HEADERS });
     }
 
