@@ -120,7 +120,7 @@ export default {
 
     const contentType = request.headers.get('Content-Type');
     if (!contentType || contentType !== 'application/json') {
-      return new Response("Unsupported media type. Use 'application/json' content type", { status: 415, headers: CORS_HEADERS });
+      return new Response("Unsupported media type. Use 'application/json' content type:"+contentType, { status: 415, headers: CORS_HEADERS });
     }
 
     return handleRequest(request, env);
