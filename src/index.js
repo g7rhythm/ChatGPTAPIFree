@@ -37,7 +37,7 @@ const obfuscateOpenAIResponse = (text) => text.replace(ORG_ID_REGEX, 'org-******
 // reverse it to obtain the original IP address, ensuring the privacy and security of the user's identity.
 const hashIp = (ip, utcNow, secret_key) => sha256(`${utcNow.format('ddd=DD.MM-HH+YYYY')}-${ip}:${secret_key}`);
 
-const handleRequest = async (request, env) => {
+const handleRequest = async (request, env,apikey_name) => {
   let requestBody;
   try {
     requestBody = await request.json();
@@ -52,7 +52,8 @@ const handleRequest = async (request, env) => {
 
   try {
     // Enforce the rate limit based on hashed client IP address
-    const  appkeys  = (await env.kv.get('appkeys', { type: 'json' })) || {};
+    apikey_name=apikey_name||'appkeys';
+    const  appkeys  = (await env.kv.get(apikey_name, { type: 'json' })) || {};
     const utcNow = moment.utc();
     const clientIp = request.headers.get('CF-Connecting-IP');
     const clientIpHash = await hashIp(clientIp, utcNow, appkeys.SECRET_KEY);
@@ -101,7 +102,7 @@ const handleRequest = async (request, env) => {
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
-    if (pathname !== '/v1/chat/completions') {
+    if (pathname.includes('/v1/chat/completions')==false ) {
       return new Response('Not found v1', { status: 404, headers: CORS_HEADERS });
     }
 
@@ -122,7 +123,9 @@ export default {
     if (!contentType || !contentType.includes('application/json')) {
       return new Response("Unsupported media type. Use 'application/json' content type:"+contentType, { status: 415, headers: CORS_HEADERS });
     }
-
+    if (pathname=='/v1/chat/completions/3-5') {
+      return handleRequest(request, env,"apikey35");
+    }
     return handleRequest(request, env);
   },
 };
