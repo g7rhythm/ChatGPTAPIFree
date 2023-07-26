@@ -1,7 +1,7 @@
 name = "chatgpt-api"
 main = "src/index.js"
 compatibility_date = "2023-03-03"
-usage_model = "bundled"
+usage_model = "unbound"
 
 kv_namespaces = [
   { binding = "kv", id = "5f7cdd115f374b4ab80fbf879416eee0" }
