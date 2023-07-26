@@ -6,6 +6,8 @@ usage_model = "unbound"
 kv_namespaces = [
   { binding = "kv", id = "5f7cdd115f374b4ab80fbf879416eee0" }
 ]
+[placement]
+mode = "smart"
 
 [triggers]
 crons = [ ]
