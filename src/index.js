@@ -104,6 +104,9 @@ const handleRequest = async (request, env,apikey_name) => {
         'Ocp-Apim-Subscription-Key':`${api_key}`
       }
     }
+    console.log("heads",heads)
+    console.log("bodyraw",bodyraw)
+
     const upstreamResponse = await fetch(postUrl, {
       method: 'POST',
       headers:heads,
