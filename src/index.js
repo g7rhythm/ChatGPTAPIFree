@@ -44,16 +44,23 @@ const hashIp = (ip, utcNow, secret_key) => sha256(`${utcNow.format('ddd=DD.MM-HH
 const handleRequest = async (request, env,apikey_name) => {
   let requestBody;
   let bodyraw;
-  let stream;
+  let stream=false;
+  const contentType = request.headers.get('Content-Type');
+ 
   try {
-    requestBody = await request.json();
-    stream = requestBody.stream;
-    if (stream != null && stream !== true && stream !== false) {
-      return new Response('The `stream` parameter must be a boolean value', { status: 400, headers: CORS_HEADERS });
+    if (contentType.includes('application/json')) {
+        requestBody = await request.json();
+        stream = requestBody.stream;
+        if (stream != null && stream !== true && stream !== false) {
+          return new Response('The `stream` parameter must be a boolean value', { status: 400, headers: CORS_HEADERS });
+        }
+        bodyraw=JSON.stringify(requestBody);
+    }else{
+        bodyraw=request.text();
     }
-    bodyraw=JSON.stringify(requestBody);
+   
   } catch (error) {
-    bodyraw=request.body;
+    bodyraw=request.text();
   }
 
  
