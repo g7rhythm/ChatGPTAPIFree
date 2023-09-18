@@ -43,16 +43,20 @@ const hashIp = (ip, utcNow, secret_key) => sha256(`${utcNow.format('ddd=DD.MM-HH
 
 const handleRequest = async (request, env,apikey_name) => {
   let requestBody;
+  let bodyraw;
+  let stream;
   try {
     requestBody = await request.json();
+    stream = requestBody.stream;
+    if (stream != null && stream !== true && stream !== false) {
+      return new Response('The `stream` parameter must be a boolean value', { status: 400, headers: CORS_HEADERS });
+    }
+    bodyraw=JSON.stringify(requestBody);
   } catch (error) {
-    return new Response('Malformed JSON', { status: 422, headers: CORS_HEADERS });
+    bodyraw=request.body;
   }
 
-  const { stream } = requestBody;
-  if (stream != null && stream !== true && stream !== false) {
-    return new Response('The `stream` parameter must be a boolean value', { status: 400, headers: CORS_HEADERS });
-  }
+ 
 
   try {
     // Enforce the rate limit based on hashed client IP address
@@ -87,7 +91,7 @@ const handleRequest = async (request, env,apikey_name) => {
     }else if(apikey_name=='tts_appkeys'){
        postUrl=TestToVoice_URL;
       heads= {
-        'Content-Type': 'application/json',       
+        'Content-Type': 'application/ssml+xml',       
         'User-Agent': 'curl/7.64.1',
         'X-Microsoft-OutputFormat':'audio-16khz-128kbitrate-mono-mp3',
         'Ocp-Apim-Subscription-Key':`${api_key}`
@@ -96,7 +100,7 @@ const handleRequest = async (request, env,apikey_name) => {
     const upstreamResponse = await fetch(postUrl, {
       method: 'POST',
       headers:heads,
-      body: JSON.stringify(requestBody),
+      body: bodyraw,
     });
 
     if (!upstreamResponse.ok) {
@@ -142,10 +146,7 @@ export default {
       return new Response('Method not allowed', { status: 405, headers: CORS_HEADERS });
     }
 
-    const contentType = request.headers.get('Content-Type');
-    if (!contentType || !contentType.includes('application/json')) {
-      return new Response("Unsupported media type. Use 'application/json' content type:"+contentType, { status: 415, headers: CORS_HEADERS });
-    }
+  
     if (pathname=='/v1/chat/completions/3-5') {
       return handleRequest(request, env,"apikey35");
     }else   if (pathname=='/v1/chat/completions/azu3') {
