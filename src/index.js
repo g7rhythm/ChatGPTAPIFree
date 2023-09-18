@@ -56,11 +56,11 @@ const handleRequest = async (request, env,apikey_name) => {
         }
         bodyraw=JSON.stringify(requestBody);
     }else{
-        bodyraw=request.text();
+        bodyraw=await request.text();
     }
    
   } catch (error) {
-    bodyraw=request.text();
+    bodyraw=await request.text();
   }
 
  
