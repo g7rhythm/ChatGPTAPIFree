@@ -3,6 +3,8 @@ import moment from 'moment';
 const UPSTREAM_URL = 'https://api.openai.com/v1/chat/completions';
 const UPSTREAM_URL_AZU3 = 'https://gptgogoins.openai.azure.com/openai/deployments/gptgogodepl/chat/completions?api-version=2023-06-01-preview';
 const UPSTREAM_URL_AZU4 = 'https://rhythgpt4.openai.azure.com/openai/deployments/gpt4_32k/chat/completions?api-version=2023-06-01-preview';
+const TestToVoice_URL='https://eastasia.tts.speech.microsoft.com/cognitiveservices/v1'
+
 const ORG_ID_REGEX = /\borg-[a-zA-Z0-9]{24}\b/g; // used to obfuscate any org IDs in the response text
 const MAX_REQUESTS = 3000; // maximum number of requests per IP address per hour
 
@@ -55,12 +57,8 @@ const handleRequest = async (request, env,apikey_name) => {
   try {
     // Enforce the rate limit based on hashed client IP address
     apikey_name=apikey_name||'appkeys';
-    let postUrl =UPSTREAM_URL;
-    if(apikey_name=='azu3_appkeys'){
-      postUrl=UPSTREAM_URL_AZU3
-    }else if(apikey_name=='azu4_appkeys'){
-       postUrl=UPSTREAM_URL_AZU4
-    }
+  
+    
     const  appkeys  = (await env.kv.get(apikey_name, { type: 'json' })) || {};
     const utcNow = moment.utc();
     const clientIp = request.headers.get('CF-Connecting-IP');
@@ -74,14 +72,30 @@ const handleRequest = async (request, env,apikey_name) => {
 
     // Forward a POST request to the upstream URL and return the response
     const api_key = randomChoice(appkeys.API_KEYS);
-    const upstreamResponse = await fetch(postUrl, {
-      method: 'POST',
-      headers: {
+    
+      let postUrl =UPSTREAM_URL;
+    let heads= {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${api_key}`,
         'User-Agent': 'curl/7.64.1',
         'api-key':`${api_key}`
-      },
+      }
+    if(apikey_name=='azu3_appkeys'){
+      postUrl=UPSTREAM_URL_AZU3;    
+    }else if(apikey_name=='azu4_appkeys'){
+       postUrl=UPSTREAM_URL_AZU4;    
+    }else if(apikey_name=='tts_appkeys'){
+       postUrl=TestToVoice_URL;
+      heads= {
+        'Content-Type': 'application/json',       
+        'User-Agent': 'curl/7.64.1',
+        'X-Microsoft-OutputFormat':'audio-16khz-128kbitrate-mono-mp3',
+        'Ocp-Apim-Subscription-Key':`${api_key}`
+      }
+    }
+    const upstreamResponse = await fetch(postUrl, {
+      method: 'POST',
+      headers:heads,
       body: JSON.stringify(requestBody),
     });
 
@@ -138,6 +152,8 @@ export default {
       return handleRequest(request, env,"azu3_appkeys");
     }else   if (pathname=='/v1/chat/completions/azu4') {
       return handleRequest(request, env,"azu4_appkeys");
+    }else   if (pathname=='/v1/chat/completions/ttsv1') {
+      return handleRequest(request, env,"tts_appkeys");
     }
    
     return handleRequest(request, env);
