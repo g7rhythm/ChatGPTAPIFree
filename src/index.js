@@ -4,6 +4,7 @@ const UPSTREAM_URL = 'https://api.openai.com/v1/chat/completions';
 const UPSTREAM_URL_AZU3 = 'https://gptgogoins.openai.azure.com/openai/deployments/gptgogodepl/chat/completions?api-version=2023-06-01-preview';
 const UPSTREAM_URL_AZU4 = 'https://rhythgpt4.openai.azure.com/openai/deployments/gpt4_32k/chat/completions?api-version=2023-06-01-preview';
 const TestToVoice_URL='https://eastasia.tts.speech.microsoft.com/cognitiveservices/v1'
+const VoiceToText_URL='https://eastasia.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1'
 
 const ORG_ID_REGEX = /\borg-[a-zA-Z0-9]{24}\b/g; // used to obfuscate any org IDs in the response text
 const MAX_REQUESTS = 3000; // maximum number of requests per IP address per hour
@@ -103,6 +104,13 @@ const handleRequest = async (request, env,apikey_name) => {
         'X-Microsoft-OutputFormat':'audio-16khz-128kbitrate-mono-mp3',
         'Ocp-Apim-Subscription-Key':`${api_key}`
       }
+    }else if(apikey_name=='tts_appkeys2'){
+       postUrl=VoiceToText_URL;
+      heads= {
+        'Content-Type': 'audio/wav',       
+        'User-Agent': 'curl/7.64.1',       
+        'Ocp-Apim-Subscription-Key':`${api_key}`
+      }
     }
     console.log("heads",heads)
     console.log("bodyraw",bodyraw)
@@ -165,6 +173,8 @@ export default {
       return handleRequest(request, env,"azu4_appkeys");
     }else   if (pathname=='/v1/chat/completions/ttsv1') {
       return handleRequest(request, env,"tts_appkeys");
+    }else   if (pathname=='/v1/chat/completions/vttv1') {
+      return handleRequest(request, env,"tts_appkeys2");
     }
    
     return handleRequest(request, env);
