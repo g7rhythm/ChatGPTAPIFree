@@ -2,7 +2,7 @@ import moment from 'moment';
 
 const UPSTREAM_URL = 'https://api.openai.com/v1/chat/completions';
 const UPSTREAM_URL_AZU3 = 'https://gptgogoins.openai.azure.com/openai/deployments/gptgogodepl/chat/completions?api-version=2023-06-01-preview';
-const UPSTREAM_URL_AZU4 = 'https://rhythgpt4.openai.azure.com/openai/deployments/gpt4_32k/chat/completions?api-version=2023-06-01-preview';
+const UPSTREAM_URL_AZU4 = 'https://gpt4jp.openai.azure.com/openai/deployments/gpt4-32kjp/chat/completions?api-version=2023-08-01-preview';
 const TestToVoice_URL='https://eastasia.tts.speech.microsoft.com/cognitiveservices/v1'
 const VoiceToText_URL='https://eastasia.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1'
 
